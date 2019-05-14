@@ -12,13 +12,13 @@ AVC::AVC(int q) {
     hardware_exchange();
 }
 
+// Send a message to open the gate
 void AVC::openGate() {
-    quadrant = 1;
-    // send message??
-    while (quadrant == 1) {
-        // wait for message??
-        // set quadrant to 2 once gate is open
-    }
+    // Connect to server (Use constants GATEIP and GATEPORT)
+    // send message
+    // receive message
+    // set quadrant to 2 once gate is open
+    quadrant = 2;
 }
 
 void AVC::followLine() {
@@ -39,8 +39,14 @@ void AVC::followLine() {
                 // Calculate the error value
                 calcError();
 
-                // Check if error is equal to 0
-                if (error != 0) { // Not 0
+                // Check error values for in front of robot, to left, and to right of robot
+                if (errorLeft < 5) { // Check for a line on the left side
+                    // Turn 90 degrees left
+                    setMotors("90 left");
+                } else if (errorRight < 5) { // Check for a line on the right side
+                    // Turn 90 degrees right
+                    setMotors("90 right");
+                } else if (error != 0) { // Check if going straight on the line
 
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / (time.tv_sec - timePrev.tv_sec));
@@ -73,7 +79,7 @@ void AVC::findDuck() {
 
 // Check for red spot in middle of camera indicating end of quadrant 3 and start of quadrant 4
 bool AVC::checkRed() {
-    // Record the number of green pixels
+    // Record the number of red pixels
     int numRedPx = 0;
 
     // Loop through all pixels in the image
@@ -100,7 +106,7 @@ void AVC::getBlackPx() {
     // Get threshold to determine whether a pixels is black or white
     double threshold = calcThreshold();
 
-    // Loop through all pixels in the image
+    // Loop through all columns of pixels in the image
     for (int col = 0; col < CAMERAWIDTH; col++) {
 
         // Get pixels whiteness
@@ -113,6 +119,31 @@ void AVC::getBlackPx() {
         } else { // Is white
             // Set pixel as white in the array
             blackPx[col] = 0;
+        }
+    }
+
+    // Loop through all rows of pixels in the image
+    for (int row = 0; row < CAMERAHEIGHT; row++) {
+        // Get pixels whiteness for left and right side of camera
+        int whiteLeft = get_pixel(row, LEFTCOL, 3);
+        int whiteRight = get_pixel(row, RIGHTCOL, 3);
+
+        // Check if black or white  for right side of camera
+        if (whiteLeft < threshold) { // Is black
+            // Set pixel as black in array
+            blackPxLeft[row] = 1;
+        } else { // Is white
+            // Set pixel as white in the array
+            blackPxLeft[row] = 0;
+        }
+
+        // Check if black or white for right side of camera
+        if (whiteRight < threshold) { // Is black
+            // Set pixel as black in array
+            blackPxRight[row] = 1;
+        } else { // Is white
+            // Set pixel as white in the array
+            blackPxRight[row] = 0;
         }
     }
 }
@@ -152,8 +183,16 @@ void AVC::calcError() {
     // Loop through array of black pixels
     for (int i = 0; i < CAMERAWIDTH; i++) {
 
-        // Weight the pixels distance from the middle
+        // Weight the pixels distance from the middle column
         error += blackPx[i] * (i - MIDDLECOL);
+    }
+
+    // Loop through array of black pixels for left and right of camera
+    for (int i = 0; i < CAMERAHEIGHT; i++) {
+
+        // Weight the pixels distance from the middle row
+        errorLeft += blackPxLeft[i] * (i - SCANNEDROW);
+        errorRight += blackPxRight[i] * (i - SCANNEDROW);
     }
 
     // measure current time to measure dt later on
@@ -164,15 +203,21 @@ void AVC::calcError() {
 void AVC::setMotors(string direction) {
 
     // Set appropriate speed values
-    if (direction == "forward") {
+    if (direction == "forward") { // Move forward
         vLeft = LEFTDEFAULT;
         vRight = RIGHTDEFAULT;
-    } else if (direction == "reverse") {
+    } else if (direction == "reverse") { // Reverse
         vLeft = RIGHTDEFAULT;
         vRight = LEFTDEFAULT;
-    } else if (direction == "turn") {
+    } else if (direction == "turn") { // Turn based on the adjustment value
         vLeft = LEFTDEFAULT + adjustment;
         vRight = RIGHTDEFAULT + adjustment;
+    } else if (direction == "90 right") { // 90 Degree right turn
+        vLeft = LEFTDEFAULT;
+        vRight = STOP;
+    } else if (direction == "90 left") { // 90 Degree left turn
+        vLeft = STOP;
+        vRight = RIGHTDEFAULT;
     }
 
     // Set Motors speed
