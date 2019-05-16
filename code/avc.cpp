@@ -61,8 +61,14 @@ void AVC::followLine() {
                 }
             } else { // Line lost
 
-                // Reverse until line is found
-                setMotors("reverse");
+                // Check for line on the sides
+                if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found
+                    // Turn around 180 degrees
+                    setMotors("180");
+                } else {
+                    // Reverse until line is found
+                    setMotors("reverse");
+                }
             }
         }
     }
@@ -212,12 +218,15 @@ void AVC::setMotors(string direction) {
     } else if (direction == "turn") { // Turn based on the adjustment value
         vLeft = LEFTDEFAULT + adjustment;
         vRight = RIGHTDEFAULT + adjustment;
-    } else if (direction == "90 right") { // 90 Degree right turn
+    } else if (direction == "90 right") { // 90 degree right turn
         vLeft = LEFTDEFAULT;
         vRight = STOP;
-    } else if (direction == "90 left") { // 90 Degree left turn
+    } else if (direction == "90 left") { // 90 degree left turn
         vLeft = STOP;
         vRight = RIGHTDEFAULT;
+    } else if (direction == "180") { // 180 degree turn (Left)
+        vLeft = LEFTDEFAULT;
+        vRight = LEFTDEFAULT;
     }
 
     // Set Motors speed
@@ -229,6 +238,7 @@ void AVC::setMotors(string direction) {
 }
 
 // debug function Run this to print out messages instead of cout<<""<<endl;
+// DEBUG constant in avc.h must be set to true
 void AVC::debug(string string) {
     if (DEBUG == true) {
         cout<<string<<endl;
