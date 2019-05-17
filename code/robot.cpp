@@ -2,6 +2,7 @@
 #include <time.h>
 #include "E101.h"
 #include "avc.h"
+#include "avc.cpp"
 using namespace std;
 
 // Initialize AVC class, hardware, etc..

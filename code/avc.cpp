@@ -157,8 +157,8 @@ void AVC::getBlackPx() {
 // Calculate threshold to determine if a pixel is black or white
 double AVC::calcThreshold() {
     // Set maximum and minimum possible values
-    int min = INT_MAX;
-    int max = INT_MIN;
+    int min = 255;
+    int max = 0;
 
     // Loop through all pixels in the image
     for (int col = 0; col < CAMERAWIDTH; col++) {
