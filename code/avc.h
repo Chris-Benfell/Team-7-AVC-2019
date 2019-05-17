@@ -13,7 +13,7 @@ class AVC {
         static const int RIGHTCOL = 60; // Column used to detect line to the left of the robot
         static const int MIDDLECOL = 160; // Column number used to weight distance from middle for error
         static const int LEFTMOTOR = 1; // Port number for left motor
-        static const int RIGHTMOTOR = 2; // Port number for right motor
+        static const int RIGHTMOTOR = 5; // Port number for right motor
         static const int STOP = 48; // Speed value used to stop motors
         static const int LEFTDEFAULT = 53; // Default speed for left motor to go forward
         static const int RIGHTDEFAULT = 43; // Default speed for right motor to go forward
