@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <time.h>
 #include "E101.h"
-#include "avc.h"
+#include "avc.hpp"
 using namespace std;
 
 // Initialize AVC
@@ -59,7 +59,7 @@ void AVC::followLine() {
                     // Go straight
                     setMotors("forward");
                 }
-            } else { // Line lost
+            } else { // Line robot.cpp avc lost
 
                 // Check for line on the sides
                 if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found
@@ -163,7 +163,7 @@ double AVC::calcThreshold() {
     // Loop through all pixels in the image
     for (int col = 0; col < CAMERAWIDTH; col++) {
 
-        // Get pixels whiteness
+        // Get pixels whiteness robot.cpp avc
         int whiteness = get_pixel(SCANNEDROW, col, 3);
 
         // Check if lower the current min
