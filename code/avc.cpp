@@ -14,20 +14,26 @@ AVC::AVC(int q) {
 
 // Send a message to open the gate
 void AVC::openGate() {
-    // Connect to server (Use constants GATEIP and GATEPORT)
-    // send message
-    // receive message
-    // set quadrant to 2 once gate is open
-    quadrant = 2;
+    if (quadrant == 1) {
+        // Connect to server (Use constants GATEIP and GATEPORT)
+        // send message
+        // receive message
+        // set quadrant to 2 once gate is open
+        quadrant = 2;
+    }
 }
 
 void AVC::followLine() {
     while (quadrant == 2) {
         take_picture();
 
-        // Check if picture contains significant red indicating beginning of quadrant 4
+        // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (checkRed()) { // Significantly red
-            quadrant = 4;
+            quadrant++;
+            if (quadrant == 3) { // Go over red patch if beginning of quadrant three
+                setMotors("forward");
+                sleep1(200);
+            }
         } else { // Line following code
 
             // Turn image into an array of 1s (black) and 0s (white)
@@ -40,12 +46,14 @@ void AVC::followLine() {
                 calcError();
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (errorLeft < 5) { // Check for a line on the left side
+                if (quadrant == 3 && errorLeft < 10) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
-                } else if (errorRight < 5) { // Check for a line on the right side
+                    sleep1(1000);
+                } else if (quadrant == 3 && errorRight < 10) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
+                    sleep1(1000);
                 } else if (error != 0) { // Check if going straight on the line
 
                     // Calculate motor adjustment
@@ -59,12 +67,13 @@ void AVC::followLine() {
                     // Go straight
                     setMotors("forward");
                 }
-            } else { // Line robot.cpp avc lost
+            } else { // Line lost
 
                 // Check for line on the sides
-                if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found
+                if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
                     // Turn around 180 degrees
                     setMotors("180");
+                    sleep1(3000);
                 } else {
                     // Reverse until line is found
                     setMotors("reverse");
@@ -76,8 +85,8 @@ void AVC::followLine() {
 
 void AVC::findDuck() {
     while (quadrant == 4) {
-        // look for a red duck, green duck and blue duck
-        // set Quadrant to 5 when done
+        // look for a red duck, green duck, blue duck and a yellow patch
+        // set quadrant to 5 when done
 
     }
     stoph(); // I think this is important?
@@ -128,28 +137,31 @@ void AVC::getBlackPx() {
         }
     }
 
-    // Loop through all rows of pixels in the image
-    for (int row = 0; row < CAMERAHEIGHT; row++) {
-        // Get pixels whiteness for left and right side of camera
-        int whiteLeft = get_pixel(row, LEFTCOL, 3);
-        int whiteRight = get_pixel(row, RIGHTCOL, 3);
+    if (quadrant == 3) { // Only if on quadrant 3
 
-        // Check if black or white  for right side of camera
-        if (whiteLeft < threshold) { // Is black
-            // Set pixel as black in array
-            blackPxLeft[row] = 1;
-        } else { // Is white
-            // Set pixel as white in the array
-            blackPxLeft[row] = 0;
-        }
+        // Loop through all rows of pixels in the image
+        for (int row = 0; row < CAMERAHEIGHT; row++) {
+            // Get pixels whiteness for left and right side of camera
+            int whiteLeft = get_pixel(row, LEFTCOL, 3);
+            int whiteRight = get_pixel(row, RIGHTCOL, 3);
 
-        // Check if black or white for right side of camera
-        if (whiteRight < threshold) { // Is black
-            // Set pixel as black in array
-            blackPxRight[row] = 1;
-        } else { // Is white
-            // Set pixel as white in the array
-            blackPxRight[row] = 0;
+            // Check if black or white for right side of camera
+            if (whiteLeft < threshold) { // Is black
+                // Set pixel as black in array
+                blackPxLeft[row] = 1;
+            } else { // Is white
+                // Set pixel as white in the array
+                blackPxLeft[row] = 0;
+            }
+
+            // Check if black or white for right side of camera
+            if (whiteRight < threshold) { // Is black
+                // Set pixel as black in array
+                blackPxRight[row] = 1;
+            } else { // Is white
+                // Set pixel as white in the array
+                blackPxRight[row] = 0;
+            }
         }
     }
 }
@@ -193,12 +205,15 @@ void AVC::calcError() {
         error += blackPx[i] * (i - MIDDLECOL);
     }
 
-    // Loop through array of black pixels for left and right of camera
-    for (int i = 0; i < CAMERAHEIGHT; i++) {
+    if (quadrant == 3) { // Only if on quadrant 3
 
-        // Weight the pixels distance from the middle row
-        errorLeft += blackPxLeft[i] * (i - SCANNEDROW);
-        errorRight += blackPxRight[i] * (i - SCANNEDROW);
+        // Loop through array of black pixels for left and right of camera
+        for (int i = 0; i < CAMERAHEIGHT; i++) {
+
+            // Weight the pixels distance from the middle row
+            errorLeft += blackPxLeft[i] * (i - SCANNEDROW);
+            errorRight += blackPxRight[i] * (i - SCANNEDROW);
+        }
     }
 
     // measure current time to measure dt later on
