@@ -24,8 +24,10 @@ void AVC::openGate() {
 }
 
 void AVC::followLine() {
+    open_screen_stream();
     while (quadrant == 2) {
         take_picture();
+        update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (checkRed()) { // Significantly red
@@ -81,6 +83,7 @@ void AVC::followLine() {
             }
         }
     }
+    close_screen_stream();
 }
 
 void AVC::findDuck() {
@@ -243,6 +246,9 @@ void AVC::setMotors(string direction) {
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT;
     }
+
+    debug(to_string(vLeft));
+    debug(to_string(vRight));
 
     // Set Motors speed
     set_motors(LEFTMOTOR, vLeft);
