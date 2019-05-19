@@ -1,4 +1,5 @@
 ssh 10.140.92.38 -p22
 cd Desktop/team7AVC/Team-7-AVC-2019/code
+git pull
 g++ robot.cpp avc.cpp -o avcCode -le101
 sudo ./avcCode
