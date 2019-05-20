@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <time.h>
+#include <cmath>
 #include "E101.h"
 #include "avc.hpp"
 using namespace std;
@@ -27,6 +28,7 @@ void AVC::followLine() {
     open_screen_stream();
     while (quadrant == 2) {
         take_picture();
+        clock_gettime(CLOCK_MONOTONIC, &timeStart);
         update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
@@ -57,9 +59,18 @@ void AVC::followLine() {
                     setMotors("90 right");
                     sleep1(1000);
                 } else if (error != 0) { // Check if going straight on the line
+					
+					
 
+					// measure current time to measure dt later on
+					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+					
+					double elapsed = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000;
+					
                     // Calculate motor adjustment
-                    adjustment = (kp * error) + (kd * (error - errorPrev) / (time.tv_sec - timePrev.tv_sec));
+                    adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
+                    
+                    debug(to_string(adjustment));             
 
                     // Set motors
                     setMotors("turn");
@@ -77,7 +88,7 @@ void AVC::followLine() {
                     setMotors("180");
                     sleep1(3000);
                 } else {
-                    // Reverse until line is found
+                    // Reverse until line is f                                                                                                                          und
                     setMotors("reverse");
                 }
             }
@@ -199,7 +210,7 @@ double AVC::calcThreshold() {
 // Calculate the error value and record the time
 void AVC::calcError() {
     errorPrev = error; // Record last error measurement
-    timePrev = time; // Record last time measurement
+
 
     // Loop through array of black pixels
     for (int i = 0; i < CAMERAWIDTH; i++) {
@@ -218,14 +229,11 @@ void AVC::calcError() {
             errorRight += blackPxRight[i] * (i - SCANNEDROW);
         }
     }
-
-    // measure current time to measure dt later on
-    clock_gettime(CLOCK_MONOTONIC, &time);
 }
 
 // Set the speed of each motor to the given value
 void AVC::setMotors(string direction) {
-
+	
     // Set appropriate speed values
     if (direction == "forward") { // Move forward
         vLeft = LEFTDEFAULT;
@@ -234,8 +242,8 @@ void AVC::setMotors(string direction) {
         vLeft = RIGHTDEFAULT;
         vRight = LEFTDEFAULT;
     } else if (direction == "turn") { // Turn based on the adjustment value
-        vLeft = LEFTDEFAULT + adjustment;
-        vRight = RIGHTDEFAULT + adjustment;
+        vLeft = LEFTDEFAULT - adjustment;
+        vRight = RIGHTDEFAULT - adjustment;
     } else if (direction == "90 right") { // 90 degree right turn
         vLeft = LEFTDEFAULT;
         vRight = STOP;
@@ -247,19 +255,22 @@ void AVC::setMotors(string direction) {
         vRight = LEFTDEFAULT;
     }
 
-    debug(to_string(vLeft));
-    debug(to_string(vRight));
+	debug(to_string(vLeft));	
+	debug(to_string(vRight));
 
     // Set Motors speed
-    set_motors(LEFTMOTOR, vLeft);
-    set_motors(RIGHTMOTOR, vRight);
+    set_motors(LEFTMOTOR, round(vLeft));
+    
+    hardware_exchange();
+    set_motors(RIGHTMOTOR, round(vRight));
+    
+    hardware_exchange();
 
     // update hardware
-    hardware_exchange();
 }
 
 // debug function Run this to print out messages instead of cout<<""<<endl;
-// DEBUG constant in avc.h must be set to true
+// DEBUG constant in avc.hpp must be set to true
 void AVC::debug(string string) {
     if (DEBUG == true) {
         cout<<string<<endl;
