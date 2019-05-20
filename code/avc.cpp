@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include <time.h>
 #include <cmath>
 #include "E101.h"
@@ -29,7 +30,7 @@ void AVC::openGate() {
 // Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
     open_screen_stream();
-    while (quadrant == 2) {
+    while (quadrant == 2 || quadrant == 3) {
         take_picture();
         clock_gettime(CLOCK_MONOTONIC, &timeStart);
         update_screen();
@@ -45,23 +46,27 @@ void AVC::followLine() {
 
             // Turn image into an array of 1s (black) and 0s (white)
             getBlackPx();
+            //for (int i = 0; i < CAMERAWIDTH; i++) {
+			//	debug(to_string(blackPx[i]));
+			//}
 
             // Check if blackPx contains 1s to indicate line detected. No 1s indicates line has been lost
             if (find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Found line
 
                 // Calculate the error value
                 calcError();
+                debug(to_string(error));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && errorLeft < 150) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && errorLeft < 300) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
                     sleep1(1000);
-                } else if (quadrant == 3 && errorRight < 150) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && errorRight < 300) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
                     sleep1(1000);
-                } else if (error > 150) { // Check if going straight on the line
+                } else if (error != 0) { // Check if going straight on the line
 
 					// measure current time to measure dt later on
 					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
@@ -71,7 +76,7 @@ void AVC::followLine() {
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
                     
-                    debug(to_string(adjustment));             
+                    debug(to_string(adjustment));
 
                     // Set motors
                     setMotors("turn");
@@ -144,7 +149,7 @@ void AVC::getBlackPx() {
         int whiteness = get_pixel(SCANNEDROW, col, 3);
 
         // Check if black or white
-        if (whiteness < threshold) { // Is black
+        if (whiteness < threshold && threshold < 150) { // Is black
             // Set pixel as black in array
             blackPx[col] = 1;
         } else { // Is white
@@ -162,7 +167,7 @@ void AVC::getBlackPx() {
             int whiteRight = get_pixel(row, RIGHTCOL, 3);
 
             // Check if black or white for right side of camera
-            if (whiteLeft < threshold) { // Is black
+            if (whiteLeft < threshold && threshold < 150) { // Is black
                 // Set pixel as black in array
                 blackPxLeft[row] = 1;
             } else { // Is white
@@ -171,7 +176,7 @@ void AVC::getBlackPx() {
             }
 
             // Check if black or white for right side of camera
-            if (whiteRight < threshold) { // Is black
+            if (whiteRight < threshold && threshold < 150) { // Is black
                 // Set pixel as black in array
                 blackPxRight[row] = 1;
             } else { // Is white
@@ -205,13 +210,16 @@ double AVC::calcThreshold() {
             max = whiteness;
         }
     }
-    // Return average of the min and max. This is threshold.
+    // Calculate average of the min and max. This is threshold.
     return (min+max)/2.0;
 }
 
 // Calculate the error value and record the time
 void AVC::calcError() {
     errorPrev = error; // Record last error measurement
+    error = 0;
+    errorLeft = 0;
+    errorRight = 0;
 
 
     // Loop through array of black pixels
@@ -258,8 +266,8 @@ void AVC::setMotors(string direction) {
     }
 
     // Debug stuff
-	debug(to_string(vLeft));	
-	debug(to_string(vRight));
+	//debug(to_string(vLeft));	
+	//debug(to_string(vRight));
 
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));

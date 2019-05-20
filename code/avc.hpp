@@ -13,11 +13,11 @@ class AVC {
         static const int RIGHTCOL = 20; // Column used to detect line to the right of the robot (Q3)
         static const int MIDDLECOL = 160; // Column number used to weight distance from middle for error (Q2 & Q3)
         static const int LEFTMOTOR = 1; // Port number for left motor
-        static const int RIGHTMOTOR = 5; // Port number for right motor
+        static const int RIGHTMOTOR = 5 // Port number for right motor
         static const int STOP = 48; // Speed value used to stop motors
         static const int LEFTDEFAULT = 52; // Default speed for left motor to go forward
         static const int RIGHTDEFAULT = 44; // Default speed for right motor to go forward
-        static const int DEBUG = false; // Set to true when you want to print stuff (use debug("hello");)
+        static const int DEBUG = true; // Set to true when you want to print stuff (use debug("hello");)
 
         // Variables
         int blackPx[CAMERAWIDTH]; // array of ones and zeros to represent black and white picture (Q2 & Q3)
@@ -25,8 +25,8 @@ class AVC {
         int blackPxRight[CAMERAHEIGHT]; // Array of black pixels for checking vertically on right side of camera (Q3)
         double vLeft = STOP; // Current left motor speed
         double vRight = STOP; // Current right motor speed
-        double kp = 0.000008; // Proportional constant
-        double kd = 0.00002;  // Derivative constant
+        double kp = 0.003; // Proportional constant
+        double kd = 0.0008;  // Derivative constant
         int error = 0; // Error value to calculate adjustment to motors speed (Q2 & Q3 & Q4)
         int errorLeft = 0; // Error value on left side of camera. Used to detect right angle turns (Q3)
         int errorRight = 0; // Error value on right side of camera. Used to detect right angle turns (Q3)
