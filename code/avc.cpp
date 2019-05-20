@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include <time.h>
+#include <cmath>
 #include "E101.h"
 #include "avc.hpp"
 using namespace std;
@@ -15,17 +17,23 @@ AVC::AVC(int q) {
 // Send a message to open the gate
 void AVC::openGate() {
     if (quadrant == 1) {
-        // Connect to server (Use constants GATEIP and GATEPORT)
-        // send message
-        // receive message
-        // set quadrant to 2 once gate is open
-        quadrant = 2;
+        if(connect_to_server("130.195.6.196", GATEPORT) == 0) {
+            send_to_server("Please");
+            char msg[24];
+            receive_from_server(msg);
+            send_to_server(msg);
+            quadrant = 2;
+        }
     }
 }
 
+// Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
-    while (quadrant == 2) {
+    open_screen_stream();
+    while (quadrant == 2 || quadrant == 3) {
         take_picture();
+        clock_gettime(CLOCK_MONOTONIC, &timeStart);
+        update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (checkRed()) { // Significantly red
@@ -38,26 +46,37 @@ void AVC::followLine() {
 
             // Turn image into an array of 1s (black) and 0s (white)
             getBlackPx();
+            //for (int i = 0; i < CAMERAWIDTH; i++) {
+			//	debug(to_string(blackPx[i]));
+			//}
 
             // Check if blackPx contains 1s to indicate line detected. No 1s indicates line has been lost
             if (find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Found line
 
                 // Calculate the error value
                 calcError();
+                debug(to_string(error));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && errorLeft < 10) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && errorLeft < 300) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
                     sleep1(1000);
-                } else if (quadrant == 3 && errorRight < 10) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && errorRight < 300) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
                     sleep1(1000);
                 } else if (error != 0) { // Check if going straight on the line
 
+					// measure current time to measure dt later on
+					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+					
+					double elapsed = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000.0;
+					
                     // Calculate motor adjustment
-                    adjustment = (kp * error) + (kd * (error - errorPrev) / (time.tv_sec - timePrev.tv_sec));
+                    adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
+                    
+                    debug(to_string(adjustment));
 
                     // Set motors
                     setMotors("turn");
@@ -70,7 +89,7 @@ void AVC::followLine() {
             } else { // Line lost
 
                 // Check for line on the sides
-                if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
+                if (quadrant == 3 && find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
                     // Turn around 180 degrees
                     setMotors("180");
                     sleep1(3000);
@@ -81,8 +100,10 @@ void AVC::followLine() {
             }
         }
     }
+    close_screen_stream();
 }
 
+// Turn around and look for ducks on paper cylinders. Quadrant 4 Code
 void AVC::findDuck() {
     while (quadrant == 4) {
         // look for a red duck, green duck, blue duck and a yellow patch
@@ -128,7 +149,7 @@ void AVC::getBlackPx() {
         int whiteness = get_pixel(SCANNEDROW, col, 3);
 
         // Check if black or white
-        if (whiteness < threshold) { // Is black
+        if (whiteness < threshold && threshold < 150) { // Is black
             // Set pixel as black in array
             blackPx[col] = 1;
         } else { // Is white
@@ -146,7 +167,7 @@ void AVC::getBlackPx() {
             int whiteRight = get_pixel(row, RIGHTCOL, 3);
 
             // Check if black or white for right side of camera
-            if (whiteLeft < threshold) { // Is black
+            if (whiteLeft < threshold && threshold < 150) { // Is black
                 // Set pixel as black in array
                 blackPxLeft[row] = 1;
             } else { // Is white
@@ -155,7 +176,7 @@ void AVC::getBlackPx() {
             }
 
             // Check if black or white for right side of camera
-            if (whiteRight < threshold) { // Is black
+            if (whiteRight < threshold && threshold < 150) { // Is black
                 // Set pixel as black in array
                 blackPxRight[row] = 1;
             } else { // Is white
@@ -189,14 +210,17 @@ double AVC::calcThreshold() {
             max = whiteness;
         }
     }
-    // Return average of the min and max. This is threshold.
+    // Calculate average of the min and max. This is threshold.
     return (min+max)/2.0;
 }
 
 // Calculate the error value and record the time
 void AVC::calcError() {
     errorPrev = error; // Record last error measurement
-    timePrev = time; // Record last time measurement
+    error = 0;
+    errorLeft = 0;
+    errorRight = 0;
+
 
     // Loop through array of black pixels
     for (int i = 0; i < CAMERAWIDTH; i++) {
@@ -215,14 +239,11 @@ void AVC::calcError() {
             errorRight += blackPxRight[i] * (i - SCANNEDROW);
         }
     }
-
-    // measure current time to measure dt later on
-    clock_gettime(CLOCK_MONOTONIC, &time);
 }
 
 // Set the speed of each motor to the given value
 void AVC::setMotors(string direction) {
-
+	
     // Set appropriate speed values
     if (direction == "forward") { // Move forward
         vLeft = LEFTDEFAULT;
@@ -231,8 +252,8 @@ void AVC::setMotors(string direction) {
         vLeft = RIGHTDEFAULT;
         vRight = LEFTDEFAULT;
     } else if (direction == "turn") { // Turn based on the adjustment value
-        vLeft = LEFTDEFAULT + adjustment;
-        vRight = RIGHTDEFAULT + adjustment;
+        vLeft = LEFTDEFAULT - adjustment;
+        vRight = RIGHTDEFAULT - adjustment;
     } else if (direction == "90 right") { // 90 degree right turn
         vLeft = LEFTDEFAULT;
         vRight = STOP;
@@ -244,18 +265,23 @@ void AVC::setMotors(string direction) {
         vRight = LEFTDEFAULT;
     }
 
-    // Set Motors speed
-    set_motors(LEFTMOTOR, vLeft);
-    set_motors(RIGHTMOTOR, vRight);
+    // Debug stuff
+	//debug(to_string(vLeft));	
+	//debug(to_string(vRight));
 
-    // update hardware
+    // Set left motors speed
+    set_motors(LEFTMOTOR, round(vLeft));
+    hardware_exchange();
+
+    // Set right motors speed
+    set_motors(RIGHTMOTOR, round(vRight));
     hardware_exchange();
 }
 
 // debug function Run this to print out messages instead of cout<<""<<endl;
-// DEBUG constant in avc.h must be set to true
+// DEBUG constant in avc.hpp must be set to true
 void AVC::debug(string string) {
-    if (DEBUG == true) {
+    if (DEBUG) {
         cout<<string<<endl;
     }
 }
