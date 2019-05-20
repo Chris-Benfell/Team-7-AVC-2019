@@ -16,14 +16,17 @@ AVC::AVC(int q) {
 // Send a message to open the gate
 void AVC::openGate() {
     if (quadrant == 1) {
-        // Connect to server (Use constants GATEIP and GATEPORT)
-        // send message
-        // receive message
-        // set quadrant to 2 once gate is open
-        quadrant = 2;
+        if(connect_to_server("130.195.6.196", GATEPORT) == 0) {
+            send_to_server("Please");
+            char msg[24];
+            receive_from_server(msg);
+            send_to_server(msg);
+            quadrant = 2;
+        }
     }
 }
 
+// Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
     open_screen_stream();
     while (quadrant == 2) {
@@ -50,22 +53,20 @@ void AVC::followLine() {
                 calcError();
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && errorLeft < 10) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && errorLeft < 150) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
                     sleep1(1000);
-                } else if (quadrant == 3 && errorRight < 10) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && errorRight < 150) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
                     sleep1(1000);
-                } else if (error != 0) { // Check if going straight on the line
-					
-					
+                } else if (error > 150) { // Check if going straight on the line
 
 					// measure current time to measure dt later on
 					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
 					
-					double elapsed = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000;
+					double elapsed = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000.0;
 					
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
@@ -83,12 +84,12 @@ void AVC::followLine() {
             } else { // Line lost
 
                 // Check for line on the sides
-                if (find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
+                if (quadrant == 3 && find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
                     // Turn around 180 degrees
                     setMotors("180");
                     sleep1(3000);
                 } else {
-                    // Reverse until line is f                                                                                                                          und
+                    // Reverse until line is found
                     setMotors("reverse");
                 }
             }
@@ -97,6 +98,7 @@ void AVC::followLine() {
     close_screen_stream();
 }
 
+// Turn around and look for ducks on paper cylinders. Quadrant 4 Code
 void AVC::findDuck() {
     while (quadrant == 4) {
         // look for a red duck, green duck, blue duck and a yellow patch
@@ -255,24 +257,23 @@ void AVC::setMotors(string direction) {
         vRight = LEFTDEFAULT;
     }
 
+    // Debug stuff
 	debug(to_string(vLeft));	
 	debug(to_string(vRight));
 
-    // Set Motors speed
+    // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
-    
-    hardware_exchange();
-    set_motors(RIGHTMOTOR, round(vRight));
-    
     hardware_exchange();
 
-    // update hardware
+    // Set right motors speed
+    set_motors(RIGHTMOTOR, round(vRight));
+    hardware_exchange();
 }
 
 // debug function Run this to print out messages instead of cout<<""<<endl;
 // DEBUG constant in avc.hpp must be set to true
 void AVC::debug(string string) {
-    if (DEBUG == true) {
+    if (DEBUG) {
         cout<<string<<endl;
     }
 }
