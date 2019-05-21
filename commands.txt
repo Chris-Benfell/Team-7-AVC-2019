@@ -1,4 +1,4 @@
-ssh pi@10.140.x.x -p22
+ssh pi@10.140.203.173 -p22
 cd Desktop/team7AVC/Team-7-AVC-2019/code
 git pull
 g++ robot.cpp avc.cpp -o avcCode -le101
