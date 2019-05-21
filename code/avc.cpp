@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <cstring>
 #include <time.h>
 #include <cmath>
 #include "E101.h"
@@ -17,12 +18,18 @@ AVC::AVC(int q) {
 // Send a message to open the gate
 void AVC::openGate() {
     if (quadrant == 1) {
-        if(connect_to_server("130.195.6.196", GATEPORT) == 0) {
-            send_to_server("Please");
+		char address[15];
+		strcpy(address, GATEIP.c_str());
+		std::string sPls = "Please";
+		char pls[24];
+		strcpy(pls, sPls.c_str());
+		
+		if(connect_to_server(address, GATEPORT) == 0) {
+            send_to_server(pls);
             char msg[24];
             receive_from_server(msg);
             send_to_server(msg);
-            quadrant = 2;
+            quadrant = 5;
         }
     }
 }
@@ -55,7 +62,7 @@ void AVC::followLine() {
 
                 // Calculate the error value
                 calcError();
-                debug(to_string(error));
+                //debug(to_string(error));
 
                 // Check error values for in front of robot, to left, and to right of robot
                 if (quadrant == 3 && errorLeft < 300) { // Check for a line on the left side (Q3)
@@ -76,7 +83,7 @@ void AVC::followLine() {
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
                     
-                    debug(to_string(adjustment));
+                    //debug(to_string(adjustment));
 
                     // Set motors
                     setMotors("turn");
@@ -92,10 +99,11 @@ void AVC::followLine() {
                 if (quadrant == 3 && find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
                     // Turn around 180 degrees
                     setMotors("180");
-                    sleep1(3000);
+                    sleep1(2000);
                 } else {
                     // Reverse until line is found
                     setMotors("reverse");
+                    sleep1(1000);
                 }
             }
         }
@@ -134,7 +142,7 @@ bool AVC::checkRed() {
     }
     // Return proportion of image that is red. 0.6 indicates a 60%
     // red image which is likely to indicate a red spot
-    return 2.0 * numRedPx / CAMERAWIDTH > 0.6;
+    return 2.0 * numRedPx / CAMERAWIDTH > 0.8;
 }
 
 // Get array of black pixels (1s and 0s)
@@ -266,15 +274,15 @@ void AVC::setMotors(string direction) {
     }
 
     // Debug stuff
-	//debug(to_string(vLeft));	
-	//debug(to_string(vRight));
+	debug(to_string(vLeft));	
+	debug(to_string(vRight));
 
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
-    hardware_exchange();
 
     // Set right motors speed
     set_motors(RIGHTMOTOR, round(vRight));
+    
     hardware_exchange();
 }
 
