@@ -29,7 +29,7 @@ void AVC::openGate() {
             char msg[24];
             receive_from_server(msg);
             send_to_server(msg);
-            quadrant = 5;
+            quadrant = 2;
         }
     }
 }
@@ -260,8 +260,8 @@ void AVC::setMotors(string direction) {
         vLeft = RIGHTDEFAULT;
         vRight = LEFTDEFAULT;
     } else if (direction == "turn") { // Turn based on the adjustment value
-        vLeft = LEFTDEFAULT - adjustment;
-        vRight = RIGHTDEFAULT - adjustment;
+        vLeft = LEFTDEFAULT + adjustment;
+        vRight = RIGHTDEFAULT + adjustment;
     } else if (direction == "90 right") { // 90 degree right turn
         vLeft = LEFTDEFAULT;
         vRight = STOP;

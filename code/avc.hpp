@@ -15,7 +15,7 @@ class AVC {
         static const int LEFTMOTOR = 1; // Port number for left motor
         static const int RIGHTMOTOR = 5; // Port number for right motor
         static const int STOP = 48; // Speed value used to stop motors
-        static const int LEFTDEFAULT = 53; // Default speed for left motor to go forward
+        static const int LEFTDEFAULT = 54; // Default speed for left motor to go forward
         static const int RIGHTDEFAULT = 40; // Default speed for right motor to go forward
         static const int DEBUG = true; // Set to true when you want to print stuff (use debug("hello");)
 
@@ -25,7 +25,7 @@ class AVC {
         int blackPxRight[CAMERAHEIGHT]; // Array of black pixels for checking vertically on right side of camera (Q3)
         double vLeft = STOP; // Current left motor speed
         double vRight = STOP; // Current right motor speed
-        double kp = 0.002; // Proportional constant
+        double kp = 0.001; // Proportional constant
         double kd = 0.0008;  // Derivative constant
         int error = 0; // Error value to calculate adjustment to motors speed (Q2 & Q3 & Q4)
         int errorLeft = 0; // Error value on left side of camera. Used to detect right angle turns (Q3)
