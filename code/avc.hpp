@@ -8,7 +8,7 @@ class AVC {
         static const int GATEPORT = 1024; // Server port to connect to the gate (Q1)
         static const int CAMERAWIDTH = 320; // Takes a guess
         static const int CAMERAHEIGHT = 240; // Also pretty obvious
-        static const int SCANNEDROW = 120; // Row number the program will use to follow the line (Q2 & Q3)
+        static const int MIDDLEROW = 120; // Row number the program will use to follow the line (Q2 & Q3)
         static const int LEFTCOL = 300; // Column used to detect line to the left of the robot (Q3)
         static const int RIGHTCOL = 20; // Column used to detect line to the right of the robot (Q3)
         static const int MIDDLECOL = 160; // Column number used to weight distance from middle for error (Q2 & Q3)
@@ -17,7 +17,7 @@ class AVC {
         static const int STOP = 48; // Speed value used to stop motors
         static const int LEFTDEFAULT = 54; // Default speed for left motor to go forward
         static const int RIGHTDEFAULT = 40; // Default speed for right motor to go forward
-        static const int DEBUG = true; // Set to true when you want to print stuff (use debug("hello");)
+        static const int DEBUG = false; // Set to true when you want to print stuff (use debug("hello");)
 
         // Variables
         int blackPx[CAMERAWIDTH]; // array of ones and zeros to represent black and white picture (Q2 & Q3)
@@ -26,7 +26,7 @@ class AVC {
         double vLeft = STOP; // Current left motor speed
         double vRight = STOP; // Current right motor speed
         double kp = 0.001; // Proportional constant
-        double kd = 0.0008;  // Derivative constant
+        double kd = 0.001;  // Derivative constant
         int error = 0; // Error value to calculate adjustment to motors speed (Q2 & Q3 & Q4)
         int errorLeft = 0; // Error value on left side of camera. Used to detect right angle turns (Q3)
         int errorRight = 0; // Error value on right side of camera. Used to detect right angle turns (Q3)
@@ -45,7 +45,7 @@ class AVC {
         void calcError(); // Calculate error to required determine adjustment and record the time
 
         // Quadrant 4 Methods
-        // Fuck
+        // Fuck. This.
 
         // Other
         void setMotors(std::string direction); // Set motors speed based on direction (forward, reverse turn)
