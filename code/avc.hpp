@@ -1,6 +1,6 @@
 #include <string>
 
-// Declarations for all of the variables and functions in our avc class
+// Declarations for all of the variables and functions in our AVC class
 class AVC {
     private:
         // Constants

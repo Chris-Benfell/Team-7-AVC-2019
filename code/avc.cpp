@@ -100,7 +100,7 @@ void AVC::followLine() {
                 // Check for line on the sides
                 if (quadrant == 3 && find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
 
-                    // DON'T THINK THIS WILL WORK
+                    // Won't work
 
                     // Turn around 180 degrees
                     setMotors("180");
