@@ -31,7 +31,7 @@ void AVC::openGate() {
 		if(connect_to_server(address, GATEPORT) == 0) { // Connected
             send_to_server(pls); // Send request to open gate
             char msg[24]; // Prepare variable to store message
-            receive_from_server(msg); // Gey password back
+            receive_from_server(msg); // Get password back
             send_to_server(msg); // Send password back to server
             quadrant = 2; // Next quadrant
         }
@@ -40,11 +40,11 @@ void AVC::openGate() {
 
 // Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
-    open_screen_stream();
+    //open_screen_stream();
     while (quadrant == 2 || quadrant == 3) {
         take_picture();
         clock_gettime(CLOCK_MONOTONIC, &timeStart);
-        update_screen();
+        //update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (checkRed()) { // Significantly red
@@ -114,7 +114,7 @@ void AVC::followLine() {
             }
         }
     }
-    close_screen_stream();
+    //close_screen_stream();
 }
 
 // Turn around and look for ducks on paper cylinders. Quadrant 4 Code
@@ -282,6 +282,7 @@ void AVC::setMotors(string direction) {
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT;
     }
+
 
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
