@@ -3,3 +3,6 @@ cd Desktop/team7AVC/Team-7-AVC-2019/code
 git pull
 g++ robot.cpp avc.cpp -o avcCode -le101
 sudo ./avcCode
+git add -A
+git commit -m "message"
+git push
