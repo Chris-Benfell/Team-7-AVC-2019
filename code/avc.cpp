@@ -40,11 +40,11 @@ void AVC::openGate() {
 
 // Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
-    //open_screen_stream();
+    open_screen_stream();
     while (quadrant == 2 || quadrant == 3) {
         take_picture();
         clock_gettime(CLOCK_MONOTONIC, &timeStart);
-        //update_screen();
+        update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (checkRed()) { // Significantly red
@@ -114,7 +114,7 @@ void AVC::followLine() {
             }
         }
     }
-    //close_screen_stream();
+    close_screen_stream();
 }
 
 // Turn around and look for ducks on paper cylinders. Quadrant 4 Code
