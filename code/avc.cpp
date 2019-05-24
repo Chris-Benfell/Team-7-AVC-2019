@@ -51,7 +51,7 @@ void AVC::followLine() {
             quadrant++;
             if (quadrant == 3) { // Go over red patch if beginning of quadrant three
                 setMotors("forward");
-                sleep1(1000);
+                sleep1(2000);
             }
             debug(to_string(quadrant));
         } else { // Line following code
@@ -64,17 +64,22 @@ void AVC::followLine() {
 
                 // Calculate the error value
                 calcError();
+                debug(to_string(error));
+                debug(to_string(errorLeft));
+                debug(to_string(errorRight));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && errorLeft > -200 && errorLeft < 300) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && errorLeft > -700 && errorLeft < 200 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
-                    sleep1(1000);
+                    debug("Turn left");
+                    sleep1(2000);
 
-                } else if (quadrant == 3 && errorRight > -300 && errorLeft < 200) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && errorRight > -200 && errorRight < 700 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
-                    sleep1(1000);
+                    debug("Turn right");
+                    sleep1(2000);
 
                 } else if (error != 0) { // Check if going straight on the line
 
@@ -86,6 +91,7 @@ void AVC::followLine() {
 					
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
+                    debug(to_string(adjustment));
 
                     // Set motors to turn based on adjustment
                     setMotors("turn");
@@ -98,19 +104,19 @@ void AVC::followLine() {
             } else { // Line lost
 
                 // Check for line on the sides
-                if (quadrant == 3 && find(begin(blackPx), end(blackPx), 1) != end(blackPx) && find(begin(blackPx), end(blackPx), 1) != end(blackPx)) { // Line not found (Q3)
+                //if (quadrant == 3 && !find(begin(blackPxLeft), end(blackPxLeft), 1) != end(blackPxLeft) && !find(begin(blackPxRight), end(blackPxRight), 1) != end(blackRight)) { // Line not found (Q3)
 
                     // Won't work
 
                     // Turn around 180 degrees
-                    setMotors("180");
-                    sleep1(2000);
+                    //setMotors("180");
+                    //sleep1(2000);
 
-                } else {
+                //} else {
                     // Reverse until line is found
                     setMotors("reverse");
                     sleep1(1000);
-                }
+                //}
             }
         }
     }
@@ -283,6 +289,9 @@ void AVC::setMotors(string direction) {
         vRight = LEFTDEFAULT;
     }
 
+
+	debug(to_string(vLeft));
+	debug(to_string(vRight));
 
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
