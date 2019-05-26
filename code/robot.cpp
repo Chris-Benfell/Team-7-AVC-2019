@@ -10,9 +10,15 @@ using namespace std;
 // once line following is done (Found red spot)
 // Tilt camera and look for red/green/blue duck/cylinder (Q4)
 int main() {
+    // Initialize robot
     AVC robot(1);
 
+    // Run functions for each quadrant
     robot.openGate();
     robot.followLine();
-    robot.findDuck();
+    robot.findDucks();
+    robot.dance();
+
+    // Stop the robot
+    stoph();
 }

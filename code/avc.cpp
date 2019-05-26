@@ -42,16 +42,19 @@ void AVC::openGate() {
 void AVC::followLine() {
     open_screen_stream();
     while (quadrant == 2 || quadrant == 3) {
-        take_picture();
+        // Start measuring time taken to run
         clock_gettime(CLOCK_MONOTONIC, &timeStart);
+
+        // Get new picture
+        take_picture();
         update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
-        if (checkRed()) { // Significantly red
+        if (propColor("red") > 0.6) { // Significantly red
             quadrant++;
             if (quadrant == 3) { // Go over red patch if beginning of quadrant three
                 setMotors("forward");
-                sleep1(2000);
+                sleep1(1500);
             }
             debug(to_string(quadrant));
         } else { // Line following code
@@ -73,27 +76,27 @@ void AVC::followLine() {
                     // Turn 90 degrees left
                     setMotors("90 left");
                     debug("Turn left");
-                    sleep1(2000);
+                    sleep1(1500);
 
                 } else if (quadrant == 3 && errorRight > -200 && errorRight < 700 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
                     debug("Turn right");
-                    sleep1(2000);
+                    sleep1(1500);
 
                 } else if (error != 0) { // Check if going straight on the line
 
-					// measure current time to measure dt later on
+					// Measure current time to calculate dt
 					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
 
-					// Calculate time elapsed between last adjustment made
-					double elapsed = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000.0;
+					// Calculate change in time since loop began
+					double dt = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000.0;
 					
                     // Calculate motor adjustment
-                    adjustment = (kp * error) + (kd * (error - errorPrev) / elapsed);
+                    adjustment = (kp * error) + (kd * (error - errorPrev) / dt);
                     debug(to_string(adjustment));
 
-                    // Set motors to turn based on adjustment
+                    // Apply adjustment to motors
                     setMotors("turn");
 
                 } else { // error is equal to 0
@@ -103,20 +106,18 @@ void AVC::followLine() {
                 }
             } else { // Line lost
 
-                // Check for line on the sides
-                //if (quadrant == 3 && !find(begin(blackPxLeft), end(blackPxLeft), 1) != end(blackPxLeft) && !find(begin(blackPxRight), end(blackPxRight), 1) != end(blackRight)) { // Line not found (Q3)
-
-                    // Won't work
+                // Check if line missing on sides but exists closer to the robot
+                if (quadrant == 3 && (find(begin(blackPxBack), end(blackPxBack), 1) != end(blackPxBack)) && (find(begin(blackPxLeft), end(blackPxLeft), 1) == end(blackPxLeft)) && (find(begin(blackPxRight), end(blackPxRight), 1) == end(blackPxRight))) { // Line not found (Q3)
 
                     // Turn around 180 degrees
-                    //setMotors("180");
-                    //sleep1(2000);
+                    setMotors("180");
+                    sleep1(2000);
 
-                //} else {
+                } else {
                     // Reverse until line is found
                     setMotors("reverse");
                     sleep1(1000);
-                //}
+                }
             }
         }
     }
@@ -124,39 +125,70 @@ void AVC::followLine() {
 }
 
 // Turn around and look for ducks on paper cylinders. Quadrant 4 Code
-void AVC::findDuck() {
-    while (quadrant == 4) {
+void AVC::findDucks() {
+    if (quadrant == 4) {
+
         // Tilt camera
-        // look for a red duck, green duck, blue duck and a yellow patch
-        // set quadrant to 5 when done
+        set_motors(CAMERASERVO, 55);
+        hardware_exchange();
+
+        // Find a red duck
+        while (!redDuck) {
+            redDuck = findDuck("red");
+        }
+
+        // Find a green duck
+        while (!greenDuck) {
+            greenDuck = findDuck("green");
+        }
+
+        // Find a blue duck
+        while (!blueDuck) {
+            blueDuck = findDuck("blue");
+        }
+
+        // Find the yellow patch (The finish which doesn't have a duck :( )
+        while (!finish) {
+            finish = findDuck("yellow");
+        }
+
+        // Finish was reached exit function
         quadrant = 5;
     }
-    // Stop the robot
-    stoph();
 }
 
-// Check for red spot in middle of camera indicating end of quadrant 3 and start of quadrant 4
-bool AVC::checkRed() {
-    // Record the number of red pixels
-    int numRedPx = 0;
+// Return what proportion the image is of the given color
+// This is literally just my Ruby code but generalised
+double AVC::propColor(string color) {
+    // Record the number of correct pixels
+    int numPx = 0;
 
     // Loop through all pixels in the image
     for (int col = CAMERAWIDTH/4; col < CAMERAWIDTH*3/4; col++) {
 
-        // Get RGB values of the pixel
+        // Get RGB values of the pixels
         int red = get_pixel(MIDDLEROW, col, 0);
         int green = get_pixel(MIDDLEROW, col, 1);
         int blue = get_pixel(MIDDLEROW, col, 2);
 
-        // Compare ratio of R:G+B to threshold to determine if red
-        if ((2.0 * red)  / (green + blue) > 2.5) { // Is red
+        // Compare ratios of RGB to determine if correct color
+        if (color == "red" && (2.0 * red)  / (green + blue) > 2.3) { // Is red
             // Record red pixel
-            numRedPx += 1;
+            numPx += 1;
+        } else if (color == "green" && (2.0 * green)  / (red + blue) > 2.3) { // Is green
+            // Record green pixel
+            numPx += 1;
+        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.3) { // Is blue
+            // Record blue pixel
+            numPx += 1;
+        } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 2.0) { // Is yellow
+            // Record yellow pixel
+            numPx += 1;
         }
     }
-    // Return proportion of image that is red. 0.6 indicates a 60%
-    // red image which is likely to indicate a red spot
-    return 2.0 * numRedPx / CAMERAWIDTH > 0.6;
+    // Return proportion of image that is correct colour. e.g. 0.7 indicates an image which
+    // is 70% that colour which is likely to indicate that it is mostly that colour
+    return 2.0 * numPx / CAMERAWIDTH;
 }
 
 // Get array of black pixels (1s and 0s)
@@ -169,14 +201,24 @@ void AVC::getBlackPx() {
 
         // Get pixels whiteness
         int whiteness = get_pixel(MIDDLEROW, col, 3);
+        int whiteBack = get_pixel(BACKROW, col, 3);
 
         // Check if black or white
         if (whiteness < threshold && threshold < 150) { // Is black
-            // Set pixel as black in array
+            // Set pixel as black
             blackPx[col] = 1;
         } else { // Is white
-            // Set pixel as white in the array
+            // Set pixel as white
             blackPx[col] = 0;
+        }
+
+        // Check if black or white in front of main row in quadrant 3
+        if (quadrant == 3 && whiteBack < threshold && threshold < 150) { // Is black
+            // Set pixel as black in the front array
+            blackPxBack[col] = 1;
+        } else { // Is white
+            // Set pixel as white in the front array
+            blackPxBack[col] = 0;
         }
     }
 
@@ -244,14 +286,30 @@ void AVC::calcError() {
 
     // Reset error values
     error = 0;
+    errorBack = 0;
     errorLeft = 0;
     errorRight = 0;
 
-    // Loop through array of black pixels
-    for (int i = 0; i < CAMERAWIDTH; i++) {
+    if (quadrant == 2 || quadrant == 3) { // On both quadrant 2 and 3
+        // Loop through array of black pixels
+        for (int i = 0; i < CAMERAWIDTH; i++) {
 
-        // Weight the pixels distance from the middle column
-        error += blackPx[i] * (i - MIDDLECOL);
+            // Weight the pixels distance from the middle column
+            error += blackPx[i] * (i - MIDDLECOL);
+
+            if (quadrant == 3) { // Only if on quadrant 3
+
+                // Weight the pixels distance from the middle column
+                errorBack += blackPxBack[i] * (i - MIDDLECOL);
+            }
+        }
+    } else if (quadrant == 4) { // Only if on quadrant 4
+        // Loop through array of colored pixels
+        for (int i = 0; i < CAMERAWIDTH; i++) {
+
+            // Weight the pixels distance from the middle column
+            error += colorPx[i] * (i - MIDDLECOL);
+        }
     }
 
     if (quadrant == 3) { // Only if on quadrant 3
@@ -262,6 +320,88 @@ void AVC::calcError() {
             // Weight the pixels distance from the middle row
             errorLeft += blackPxLeft[i] * (i - MIDDLEROW);
             errorRight += blackPxRight[i] * (i - MIDDLEROW);
+        }
+    }
+}
+
+// Find a duck of a given color
+bool AVC::findDuck(string color) {
+    // Start measuring time taken to run
+    clock_gettime(CLOCK_MONOTONIC, &timeStart);
+
+    // Get new picture
+    take_picture();
+
+    // Turn picture into an array of pixels of the right color (1) and not (0)
+    getColorPx(color);
+
+    // Check if there are pixels of the right color in image
+    if (find(begin(colorPx), end(colorPx), 1) != end(colorPx)) { // Found pixels
+
+        // Check if color enough to have reached a duck
+        if (propColor(color) > 0.8) { // Reached duck
+            return true;
+        } else { // Has not reached duck
+
+            // Calculate the error value
+            calcError();
+
+            // Check if duck is roughly in center of image
+            if (error > -300 && error < 300) {
+                setMotors("forward");
+            } else { // Not in center
+
+                // Measure current time to calculate dt
+                clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+
+                // Calculate change in time since loop began
+                double dt = ((timeEnd.tv_sec - timeStart.tv_sec) * 1000000000 + (timeEnd.tv_nsec - timeStart.tv_nsec))/10000000.0;
+
+                // Calculate motor adjustment
+                adjustment = (kp * error) + (kd * (error - errorPrev) / dt);
+
+                // Apply adjustment to motors
+                setMotors("turn");
+            }
+        }
+    } else { // Didn't find any, or enough of the right color
+
+        // Turn to find it
+        if (color == "green" || color == "yellow") {
+            setMotors("rotate left");
+        } else {
+            setMotors("rotate right");
+        }
+    }
+    return false;
+}
+
+void AVC::getColorPx(string color) {
+
+    // Loop through all columns of pixels in the image
+    for (int col = 0; col < CAMERAWIDTH; col++) {
+
+        // Get RGB values of the pixels
+        int red = get_pixel(MIDDLEROW, col, 0);
+        int green = get_pixel(MIDDLEROW, col, 1);
+        int blue = get_pixel(MIDDLEROW, col, 2);
+
+        // Compare ratio of RGB to determine the pixels color
+        if (color == "red" && (2.0 * red)  / (green + blue) > 2.3) { // Is red
+            // Set pixel as red
+            colorPx[col] = 1;
+        } else if (color == "green" && (2.0 * green)  / (red + blue) > 2.3) { // Is green
+            // Set pixel as green
+            colorPx[col] = 1;
+        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.3) { // Is blue
+            // Set pixel as blue
+            colorPx[col] = 1;
+        } else if (color == "yellow" && (red + green) / (2.0 * blue)  > 2.0) { // Is yellow
+            // Set pixel as yellow
+            colorPx[col] = 1;
+        } else {
+            // Pixel is not the defined color
+            colorPx[col] = 0;
         }
     }
 }
@@ -284,9 +424,15 @@ void AVC::setMotors(string direction) {
     } else if (direction == "90 left") { // 90 degree left turn
         vLeft = STOP;
         vRight = RIGHTDEFAULT;
-    } else if (direction == "180") { // 180 degree turn (Left)
+    } else if (direction == "180") { // 180 degree turn (right)
         vLeft = LEFTDEFAULT;
-        vRight = LEFTDEFAULT;
+        vRight = LEFTDEFAULT + 2;
+    } else if (direction == "rotate right") {
+        vLeft = 50;
+        vRight = 52;
+    } else if (direction == "rotate left") {
+        vLeft = 46;
+        vRight = 44;
     }
 
 
@@ -307,5 +453,15 @@ void AVC::setMotors(string direction) {
 void AVC::debug(string string) {
     if (DEBUG) {
         cout<<string<<endl;
+    }
+}
+
+// Dance to celebrate finishing
+void AVC::dance() {
+    if (finish) {
+        setMotors("reverse");
+        sleep1(500);
+        setMotors("rotate right");
+        sleep1(5000);
     }
 }
