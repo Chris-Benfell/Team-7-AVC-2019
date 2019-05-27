@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-	init(0)
+	init(0);
 	hardware_exchange();
 	set_motors(1,48);
 	set_motors(5,48);
