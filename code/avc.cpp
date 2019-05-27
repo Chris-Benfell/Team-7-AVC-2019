@@ -60,7 +60,7 @@ void AVC::followLine() {
                 sleep1(2000);
             } else {
 				setMotors("forward");
-				sleep1(1000);
+				sleep1(2000);
 				setMotors("stop");	
 			}
             debug(to_string(quadrant));
@@ -77,7 +77,7 @@ void AVC::followLine() {
                 debug(to_string(errorLeft));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && direction - 1 > 0 && errorLeft > -800 && errorLeft < -300 && errorLeft != 0) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < 100 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
 
@@ -485,8 +485,9 @@ void AVC::debug(string string) {
 void AVC::dance() {
     if (finish) {
         setMotors("reverse");
-        sleep1(1000);
+        sleep1(2000);
         setMotors("180");
         sleep1(5000);
+        setMotors("stop");
     }
 }
