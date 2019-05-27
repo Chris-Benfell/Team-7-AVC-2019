@@ -75,20 +75,26 @@ void AVC::followLine() {
                 if (quadrant == 3 && direction - 1 > 0 && errorLeft > -400 && errorLeft < 200 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
-                    debug("Turn left");
+
+                    // Update direction
                     direction--;
+
+                    debug("Turn left");
                     debug(to_string(direction));
                     sleep1(3000);
 
-                } else if (quadrant == 3 && direction + 1 < 5 && errorRight > 200 && errorRight < 400 && errorRight != 0) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 200 && errorRight < 400 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
-                    debug("Turn right");
+
+                    // Update direction
                     direction++;
+
+                    debug("Turn right");
                     debug(to_string(direction));
                     sleep1(3000);
 
-                } else if (error != 0 && error > -10000 && error < 10000) { // Check if going straight on the line
+                } else if (error != 0 && error > -9000 && error < 9000) { // Check if going straight on the line
 
 					// Measure current time to calculate dt
 					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
@@ -114,12 +120,16 @@ void AVC::followLine() {
 
                     // Turn around 180 degrees
                     setMotors("180");
+
+                    // Update direction
                     if (direction == 0 || direction == 1) {
 						direction += 2;
 					} else {
 						direction -= 2;
 					}
+
                     debug("Doing 180 turn");
+                    debug(to_string(direction));
                     sleep1(4000);
 
                 } else {
