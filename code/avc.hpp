@@ -17,9 +17,9 @@ class AVC {
         static const int RIGHTMOTOR = 5; // Port number for right motor
         static const int CAMERASERVO = 3; // Port number for camera servo (Q4)
         static const int STOP = 48; // Speed value used to stop motors
-        static const int LEFTDEFAULT = 54; // Default speed for left motor to go forward
-        static const int RIGHTDEFAULT = 40; // Default speed for right motor to go forward
-        static const int DEBUG = false; // Set to true when you want to print stuff (use debug("hello");)
+        static const int LEFTDEFAULT = 56; // Default speed for left motor to go forward
+        static const int RIGHTDEFAULT = 38; // Default speed for right motor to go forward
+        static const int DEBUG = true; // Set to true when you want to print stuff (use debug("hello");)
 
         // Variables
         int blackPx[CAMERAWIDTH]; // Array of ones and zeros to represent black and white picture (Q2 & Q3)
@@ -29,8 +29,8 @@ class AVC {
         int colorPx[CAMERAWIDTH]; // Array of color pixels to find the ducks (Q4)
         double vLeft = STOP; // Current left motor speed (Q2 & Q3 & Q4)
         double vRight = STOP; // Current right motor speed (Q2 & Q3 & Q4)
-        double kp = 0.001; // Proportional constant (Q2 & Q3 & Q4)
-        double kd = 0.0008;  // Derivative constant (Q2 & Q3 & Q4)
+        double kp = 0.0009; // Proportional constant (Q2 & Q3 & Q4)
+        double kd = 0.0007;  // Derivative constant (Q2 & Q3 & Q4)
         int error = 0; // Error value to calculate adjustment to motors speed (Q2 & Q3 & Q4)
         int errorBack = 0; // Error value closer to robot. Used to detect dead ends (Q3)
         int errorLeft = 0; // Error value on left side of camera. Used to detect right angle turns (Q3)
@@ -39,6 +39,7 @@ class AVC {
         struct timespec timeStart; // Time measured to calculate dt for de/dt (Q2 & Q3 & Q4)
         struct timespec timeEnd; // Records previous measured time to calculate dt for de/dt (Q2 & Q3 & Q4)
         double adjustment = 0; // Amount to adjust motors (Q2 & Q3 & Q4)
+        int direction = 1; // Keep track of direction when doing right turns (Q3)
         bool redDuck = false; // Whether the red duck has been found (Q4)
         bool greenDuck = false; // Whether the green duck has been found (Q4)
         bool blueDuck = false; // Whether the blue duck has been found (Q4)
@@ -50,7 +51,7 @@ class AVC {
         // Quadrant 2 and 3 Methods
         double propColor(std::string color); // Returns what proportion the image is of the given color
         void getBlackPx(); // Get an image and turn it into an array of 1s (black) and 0s (white)
-        double calcThreshold(); // Calculate threshold for determining whether a pixel is black or white
+        double calcThreshold(int row); // Calculate threshold for determining whether a pixel is black or white
         void calcError(); // Calculate error to required determine adjustment and record the time
 
         // Quadrant 4 Methods

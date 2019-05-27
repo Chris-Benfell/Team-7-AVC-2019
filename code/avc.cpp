@@ -33,6 +33,8 @@ void AVC::openGate() {
             char msg[24]; // Prepare variable to store message
             receive_from_server(msg); // Get password back
             send_to_server(msg); // Send password back to server
+            setMotors("really fast");
+            sleep1(6000);
             quadrant = 2; // Next quadrant
         }
     }
@@ -40,21 +42,22 @@ void AVC::openGate() {
 
 // Follow a line. Quadrant 2 and 3 Code
 void AVC::followLine() {
-    open_screen_stream();
+    //open_screen_stream();
     while (quadrant == 2 || quadrant == 3) {
         // Start measuring time taken to run
         clock_gettime(CLOCK_MONOTONIC, &timeStart);
 
         // Get new picture
         take_picture();
-        update_screen();
+        //update_screen();
 
         // Check if picture contains significant red indicating beginning of quadrant 3 or 4
         if (propColor("red") > 0.6) { // Significantly red
             quadrant++;
             if (quadrant == 3) { // Go over red patch if beginning of quadrant three
-                setMotors("forward");
-                sleep1(1500);
+                setMotors("really fast");
+                debug(to_string(direction));
+                sleep1(2000);
             }
             debug(to_string(quadrant));
         } else { // Line following code
@@ -67,24 +70,25 @@ void AVC::followLine() {
 
                 // Calculate the error value
                 calcError();
-                debug(to_string(error));
-                debug(to_string(errorLeft));
-                debug(to_string(errorRight));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && errorLeft > -700 && errorLeft < 200 && errorLeft != 0) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && direction - 1 > 0 && errorLeft > -300 && errorLeft < 200 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
                     debug("Turn left");
-                    sleep1(1500);
+                    direction--;
+                    debug(to_string(direction));
+                    sleep1(3000);
 
-                } else if (quadrant == 3 && errorRight > -200 && errorRight < 700 && errorRight != 0) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && direction + 1 < 5 && errorRight > -200 && errorRight < 300 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
                     debug("Turn right");
-                    sleep1(1500);
+                    direction++;
+                    debug(to_string(direction));
+                    sleep1(3000);
 
-                } else if (error != 0) { // Check if going straight on the line
+                } else if (error != 0 && error > -10000 && error < 10000) { // Check if going straight on the line
 
 					// Measure current time to calculate dt
 					clock_gettime(CLOCK_MONOTONIC, &timeEnd);
@@ -94,7 +98,6 @@ void AVC::followLine() {
 					
                     // Calculate motor adjustment
                     adjustment = (kp * error) + (kd * (error - errorPrev) / dt);
-                    debug(to_string(adjustment));
 
                     // Apply adjustment to motors
                     setMotors("turn");
@@ -111,7 +114,8 @@ void AVC::followLine() {
 
                     // Turn around 180 degrees
                     setMotors("180");
-                    sleep1(2000);
+                    sleep1(5000);
+                    debug("Doing 180 turn");
 
                 } else {
                     // Reverse until line is found
@@ -121,7 +125,7 @@ void AVC::followLine() {
             }
         }
     }
-    close_screen_stream();
+    //close_screen_stream();
 }
 
 // Turn around and look for ducks on paper cylinders. Quadrant 4 Code
@@ -194,7 +198,8 @@ double AVC::propColor(string color) {
 // Get array of black pixels (1s and 0s)
 void AVC::getBlackPx() {
     // Get threshold to determine whether a pixels is black or white
-    double threshold = calcThreshold();
+    double threshold = calcThreshold(MIDDLEROW);
+    double backThreshold = calcThreshold(BACKROW);
 
     // Loop through all columns of pixels in the image
     for (int col = 0; col < CAMERAWIDTH; col++) {
@@ -213,7 +218,7 @@ void AVC::getBlackPx() {
         }
 
         // Check if black or white in front of main row in quadrant 3
-        if (quadrant == 3 && whiteBack < threshold && threshold < 150) { // Is black
+        if (quadrant == 3 && whiteBack < backThreshold && backThreshold < 150) { // Is black
             // Set pixel as black in the front array
             blackPxBack[col] = 1;
         } else { // Is white
@@ -232,7 +237,7 @@ void AVC::getBlackPx() {
             int whiteRight = get_pixel(row, RIGHTCOL, 3);
 
             // Check if black or white for right side of camera
-            if (whiteLeft < threshold && threshold < 150) { // Is black
+            if (whiteLeft < threshold && threshold < 130) { // Is black
                 // Set pixel as black in the left array
                 blackPxLeft[row] = 1;
             } else { // Is white
@@ -241,7 +246,7 @@ void AVC::getBlackPx() {
             }
 
             // Check if black or white for right side of camera
-            if (whiteRight < threshold && threshold < 150) { // Is black
+            if (whiteRight < threshold && threshold < 130) { // Is black
                 // Set pixel as black in the right array
                 blackPxRight[row] = 1;
             } else { // Is white
@@ -253,7 +258,7 @@ void AVC::getBlackPx() {
 }
 
 // Calculate threshold to determine if a pixel is black or white
-double AVC::calcThreshold() {
+double AVC::calcThreshold(int row) {
     // Set maximum and minimum possible values
     int min = 255;
     int max = 0;
@@ -262,7 +267,7 @@ double AVC::calcThreshold() {
     for (int col = 0; col < CAMERAWIDTH; col++) {
 
         // Get pixels whiteness robot.cpp avc
-        int whiteness = get_pixel(MIDDLEROW, col, 3);
+        int whiteness = get_pixel(row, col, 3);
 
         // Check if lower the current min
         if (whiteness < min) { // Is lower
@@ -423,22 +428,21 @@ void AVC::setMotors(string direction) {
         vRight = STOP;
     } else if (direction == "90 left") { // 90 degree left turn
         vLeft = STOP;
-        vRight = RIGHTDEFAULT;
+        vRight = RIGHTDEFAULT - 2;
     } else if (direction == "180") { // 180 degree turn (right)
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT + 2;
-    } else if (direction == "rotate right") {
+    } else if (direction == "rotate right") { // Rotate slowly right
         vLeft = 50;
         vRight = 52;
-    } else if (direction == "rotate left") {
+    } else if (direction == "rotate left") { // Rotate slowly left
         vLeft = 46;
         vRight = 44;
+    } else if (direction == "really fast") { // Go really fast
+        vLeft = 63;
+        vRight = 30;
     }
-
-
-	debug(to_string(vLeft));
-	debug(to_string(vRight));
-
+    
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
 
