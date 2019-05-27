@@ -59,6 +59,9 @@ void AVC::followLine() {
                 debug(to_string(direction));
                 sleep1(2000);
             }
+				setMotors("forward");
+				setMotors("stop");	
+			}
             debug(to_string(quadrant));
         } else { // Line following code
 
@@ -450,10 +453,10 @@ void AVC::setMotors(string direction) {
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT + 2;
     } else if (direction == "rotate right") { // Rotate slowly right
-        vLeft = 50;
-        vRight = 52;
+        vLeft = 54;
+        vRight = 54;
     } else if (direction == "rotate left") { // Rotate slowly left
-        vLeft = 46;
+        vLeft = 44;
         vRight = 44;
     } else if (direction == "really fast") { // Go really fast
         vLeft = 63;
@@ -481,8 +484,8 @@ void AVC::debug(string string) {
 void AVC::dance() {
     if (finish) {
         setMotors("reverse");
-        sleep1(500);
-        setMotors("rotate right");
+        sleep1(1000);
+        setMotors("180");
         sleep1(5000);
     }
 }
