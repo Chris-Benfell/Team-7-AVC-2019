@@ -70,9 +70,10 @@ void AVC::followLine() {
 
                 // Calculate the error value
                 calcError();
+                debug(to_string(errorLeft));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < -100 && errorLeft != 0) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && direction - 1 > 0 && errorLeft > -500 && errorLeft < 0 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
 
