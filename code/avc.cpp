@@ -77,7 +77,7 @@ void AVC::followLine() {
                 debug(to_string(errorLeft));
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < 100 && errorLeft != 0) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && direction - 1 > 0 && errorLeft > -400 && errorLeft < 100 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     setMotors("90 left");
 
@@ -454,7 +454,7 @@ void AVC::setMotors(string direction) {
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT + 2;
     } else if (direction == "rotate right") { // Rotate slowly right
-        vLeft = 54;
+        vLeft = 56;
         vRight = 54;
     } else if (direction == "rotate left") { // Rotate slowly left
         vLeft = 44;
