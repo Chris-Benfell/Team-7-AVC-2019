@@ -60,7 +60,7 @@ void AVC::followLine() {
                 sleep1(2000);
             } else {
 				setMotors("forward");
-				sleep1(1000)
+				sleep1(1000);
 				setMotors("stop");	
 			}
             debug(to_string(quadrant));
