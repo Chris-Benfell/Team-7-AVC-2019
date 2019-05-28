@@ -98,7 +98,7 @@ void AVC::followLine() {
 
                     debug("Turn right");
                     debug(to_string(direction));
-                    sleep1(3000);
+                    sleep1(2500);
 
                 } else if (error != 0 && error > -9000 && error < 9000) { // Check if going straight on the line
 
@@ -454,11 +454,11 @@ void AVC::setMotors(string direction) {
         vLeft = LEFTDEFAULT;
         vRight = LEFTDEFAULT + 2;
     } else if (direction == "rotate right") { // Rotate slowly right
-        vLeft = 56;
-        vRight = 54;
+        vLeft = 54;
+        vRight = 52;
     } else if (direction == "rotate left") { // Rotate slowly left
         vLeft = 44;
-        vRight = 44;
+        vRight = 42;
     } else if (direction == "really fast") { // Go really fast
         vLeft = 63;
         vRight = 30;
