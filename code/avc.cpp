@@ -88,7 +88,7 @@ void AVC::followLine() {
                     debug(to_string(direction));
                     sleep1(2500);
 
-                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 500 && errorRight < 1200 && errorRight != 0) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 700 && errorRight < 1400 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     setMotors("90 right");
 
@@ -229,7 +229,7 @@ void AVC::getBlackPx() {
         int whiteBack = get_pixel(BACKROW, col, 3);
 
         // Check if black or white
-        if (whiteness < threshold && threshold < 150) { // Is black
+        if (whiteness < threshold && threshold < 130) { // Is black
             // Set pixel as black
             blackPx[col] = 1;
         } else { // Is white
@@ -238,7 +238,7 @@ void AVC::getBlackPx() {
         }
 
         // Check if black or white in front of main row in quadrant 3
-        if (quadrant == 3 && whiteBack < backThreshold && backThreshold < 150) { // Is black
+        if (quadrant == 3 && whiteBack < backThreshold && backThreshold < 130) { // Is black
             // Set pixel as black in the front array
             blackPxBack[col] = 1;
         } else { // Is white
@@ -257,7 +257,7 @@ void AVC::getBlackPx() {
             int whiteRight = get_pixel(row, RIGHTCOL, 3);
 
             // Check if black or white for right side of camera
-            if (whiteLeft < backThreshold && backThreshold < 150) { // Is black
+            if (whiteLeft < backThreshold && backThreshold < 130) { // Is black
                 // Set pixel as black in the left array
                 blackPxLeft[row] = 1;
             } else { // Is white
@@ -266,7 +266,7 @@ void AVC::getBlackPx() {
             }
 
             // Check if black or white for right side of camera
-            if (whiteRight < backThreshold && backThreshold < 150) { // Is black
+            if (whiteRight < backThreshold && backThreshold < 130) { // Is black
                 // Set pixel as black in the right array
                 blackPxRight[row] = 1;
             } else { // Is white
