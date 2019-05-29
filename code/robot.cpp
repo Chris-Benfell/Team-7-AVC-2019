@@ -11,7 +11,7 @@ using namespace std;
 // Tilt camera and look for red/green/blue duck/cylinder (Q4)
 int main() {
     // Initialize robot
-    AVC robot(3);
+    AVC robot(4);
 
     // Run functions for each quadrant
     robot.openGate();
