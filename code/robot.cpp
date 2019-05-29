@@ -9,9 +9,9 @@ using namespace std;
 // Then run line following code (Q2 & Q3)
 // once line following is done (Found red spot)
 // Tilt camera and look for red/green/blue duck/cylinder (Q4)
-int main(int quad,char** argv) {
+int main() {
     // Initialize robot
-    AVC robot(quad);
+    AVC robot(3);
 
     // Run functions for each quadrant
     robot.openGate();
