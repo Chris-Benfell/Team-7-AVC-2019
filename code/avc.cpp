@@ -204,7 +204,7 @@ double AVC::propColor(string color) {
         } else if (color == "green" && (2.0 * green)  / (red + blue) > 2.3) { // Is green
             // Record green pixel
             numPx += 1;
-        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.3) { // Is blue
+        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.0) { // Is blue
             // Record blue pixel
             numPx += 1;
         } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 2.0) { // Is yellow
@@ -366,7 +366,7 @@ bool AVC::findDuck(string color) {
     if (find(begin(colorPx), end(colorPx), 1) != end(colorPx)) { // Found pixels
 
         // Check if color enough to have reached a duck
-        if (propColor(color) > 0.8) { // Reached duck
+        if (propColor(color) > 0.9) { // Reached duck
             return true;
         } else { // Has not reached duck
 
@@ -420,7 +420,7 @@ void AVC::getColorPx(string color) {
         } else if (color == "green" && (2.0 * green)  / (red + blue) > 2.3) { // Is green
             // Set pixel as green
             colorPx[col] = 1;
-        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.3) { // Is blue
+        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.0) { // Is blue
             // Set pixel as blue
             colorPx[col] = 1;
         } else if (color == "yellow" && (red + green) / (2.0 * blue)  > 2.0) { // Is yellow
@@ -458,8 +458,8 @@ void AVC::setMotors(string direction) {
         vLeft = 54;
         vRight = 52;
     } else if (direction == "rotate left") { // Rotate slowly left
-        vLeft = 44;
-        vRight = 42;
+        vLeft = 42;
+        vRight = 40;
     } else if (direction == "really fast") { // Go really fast
         vLeft = 63;
         vRight = 30;
