@@ -78,6 +78,7 @@ void AVC::followLine() {
                 // Check error values for in front of robot, to left, and to right of robot
                 if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < 1000 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
+                    sleep1(500);
                     setMotors("90 left");
 
                     // Update direction
@@ -90,6 +91,7 @@ void AVC::followLine() {
 
                 } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 400 && errorRight < 1000 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
+                    sleep1(500);
                     setMotors("90 right");
 
                     // Update direction
