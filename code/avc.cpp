@@ -162,22 +162,22 @@ void AVC::findDucks() {
         while (!redDuck) {
             redDuck = findDuck("red");
         }
-
+		debug("Found red duck");
         // Find a green duck
         while (!greenDuck) {
             greenDuck = findDuck("green");
         }
-
+		debug("Found yellow duck");
         // Find a blue duck
         while (!blueDuck) {
             blueDuck = findDuck("blue");
         }
-
+		debug("Found blue duck");
         // Find the yellow patch (The finish which doesn't have a duck :( )
         while (!finish) {
             finish = findDuck("yellow");
         }
-
+		debug("Found yellow patch");
         // Finish was reached exit function
         quadrant = 5;
     }
