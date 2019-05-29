@@ -207,7 +207,7 @@ double AVC::propColor(string color) {
         } else if (color == "blue" && (2.0 * blue)  / (red + green) > 1.7) { // Is blue
             // Record blue pixel
             numPx += 1;
-        } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 2.2) { // Is yellow
+        } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 1.7) { // Is yellow
             // Record yellow pixel
             numPx += 1;
         }
@@ -423,7 +423,7 @@ void AVC::getColorPx(string color) {
         } else if (color == "blue" && (2.0 * blue)  / (red + green) > 1.7) { // Is blue
             // Set pixel as blue
             colorPx[col] = 1;
-        } else if (color == "yellow" && (red + green) / (2.0 * blue)  > 2.2) { // Is yellow
+        } else if (color == "yellow" && (red + green) / (2.0 * blue)  > 1.7) { // Is yellow
             // Set pixel as yellow
             colorPx[col] = 1;
         } else {
