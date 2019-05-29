@@ -204,10 +204,10 @@ double AVC::propColor(string color) {
         } else if (color == "green" && (2.0 * green)  / (red + blue) > 2.3) { // Is green
             // Record green pixel
             numPx += 1;
-        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 2.7) { // Is blue
+        } else if (color == "blue" && (2.0 * blue)  / (red + green) > 1.7) { // Is blue
             // Record blue pixel
             numPx += 1;
-        } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 2.0) { // Is yellow
+        } else if (color == "yellow" &&  (red + green) / (2.0 * blue) > 2.5) { // Is yellow
             // Record yellow pixel
             numPx += 1;
         }
