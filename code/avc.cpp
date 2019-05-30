@@ -178,6 +178,7 @@ void AVC::findDucks() {
             finish = findDuck("yellow");
         }
 		debug("Found yellow patch");
+		sleep1(2000);
         // Finish was reached exit function
         quadrant = 5;
     }
@@ -207,7 +208,7 @@ double AVC::propColor(string color) {
         } else if (color == "blue" && (2.0 * blue)  / (red + green) > 1.7) { // Is blue
             // Record blue pixel
             numPx += 1;
-        } else if (color == "yellow" && 1.0 * red / blue > 1.3 && 1.0 * green / blue > 1.3 && 1.0 * red / blue < 1.7 && 1.0 * green / blue < 1.7) { // Is yellow
+        } else if (color == "yellow" && 1.0 * red / blue > 1.4 && 1.0 * green / blue > 1.4 && 1.0 * red / blue < 1.8 && 1.0 * green / blue < 1.8) { // Is yellow
             // Record yellow pixel
             numPx += 1;
         }
@@ -427,7 +428,7 @@ void AVC::getColorPx(string color) {
         } else if (color == "blue" && (2.0 * blue)  / (red + green) > 1.7) { // Is blue
             // Set pixel as blue
             colorPx[col] = 1;
-        } else if (color == "yellow" && 1.0 * red / blue > 1.3 && 1.0 * green / blue > 1.3 && 1.0 * red / blue < 1.7 && 1.0 * green / blue < 1.7) { // Is yellow
+        } else if (color == "yellow" && 1.0 * red / blue > 1.4 && 1.0 * green / blue > 1.4 && 1.0 * red / blue < 1.8 && 1.0 * green / blue < 1.8) { // Is yellow
             // Set pixel as yellow
             colorPx[col] = 1;
         } else {
@@ -495,7 +496,7 @@ void AVC::dance() {
         setMotors("reverse");
         sleep1(2000);
         setMotors("180");
-        sleep1(5000);
+        sleep1(20000);
         setMotors("stop");
     }
 }
