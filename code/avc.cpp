@@ -370,7 +370,7 @@ bool AVC::findDuck(string color) {
     if (find(begin(colorPx), end(colorPx), 1) != end(colorPx)) { // Found pixels
 
         // Check if color enough to have reached a duck
-        if ((color != "yellow" && propColor(color) > 0.9) || (color == "yellow" && propColor(color) > 9.8)) { // Reached duck
+        if ((color != "yellow" && propColor(color) > 0.9) || (color == "yellow" && propColor(color) > 0.98)) { // Reached duck
             return true;
         } else { // Has not reached duck
 
