@@ -370,7 +370,7 @@ bool AVC::findDuck(string color) {
     if (find(begin(colorPx), end(colorPx), 1) != end(colorPx)) { // Found pixels
 
         // Check if color enough to have reached a duck
-        if (propColor(color) > 0.9) { // Reached duck
+        if ((color != "yellow" && propColor(color) > 0.9) || (color == "yellow" && propColor(color) > 9.8)) { // Reached duck
             return true;
         } else { // Has not reached duck
 
@@ -467,7 +467,10 @@ void AVC::setMotors(string direction) {
     } else if (direction == "really fast") { // Go really fast
         vLeft = 63;
         vRight = 30;
-    }
+    } else if (direction == "stop") {
+		vLeft = STOP;
+		vRight = STOP;
+	}
     
     // Set left motors speed
     set_motors(LEFTMOTOR, round(vLeft));
