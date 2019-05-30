@@ -210,11 +210,10 @@ double AVC::propColor(string color) {
         } else if (color == "yellow" && 1.0 * red / blue > 1.3 && 1.0 * green / blue > 1.3 && 1.0 * red / blue < 1.7 && 1.0 * green / blue < 1.7) { // Is yellow
             // Record yellow pixel
             numPx += 1;
-        } //else {
-			//debug(to_string(1.0 * red / blue));
-			//debug(to_string(1.0 * green / blue));
-		//}
+        }
     }
+    debug(to_string(1.0 * red / blue));
+	debug(to_string(1.0 * green / blue));
     // Return proportion of image that is correct colour. e.g. 0.7 indicates an image which
     // is 70% that colour which is likely to indicate that it is mostly that colour
     return 2.0 * numPx / CAMERAWIDTH;
