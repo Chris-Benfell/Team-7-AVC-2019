@@ -211,7 +211,7 @@ double AVC::propColor(string color) {
             // Record yellow pixel
             numPx += 1;
         }
-        if (col = MIDDLECOL) {
+        if (col == MIDDLECOL) {
 			debug(to_string(1.0 * red / blue));
 			debug(to_string(1.0 * green / blue));
 		}
