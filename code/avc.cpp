@@ -179,7 +179,7 @@ void AVC::findDucks() {
         }
 		debug("Found yellow patch");
 		setMotors("forward");
-		sleep1(2000);
+		sleep1(5000);
         // Finish was reached exit function
         quadrant = 5;
     }
