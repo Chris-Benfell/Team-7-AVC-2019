@@ -211,9 +211,11 @@ double AVC::propColor(string color) {
             // Record yellow pixel
             numPx += 1;
         }
+        if (col = MIDDLECOL) {
+			debug(to_string(1.0 * red / blue));
+			debug(to_string(1.0 * green / blue));
+		}
     }
-    debug(to_string(1.0 * red / blue));
-	debug(to_string(1.0 * green / blue));
     // Return proportion of image that is correct colour. e.g. 0.7 indicates an image which
     // is 70% that colour which is likely to indicate that it is mostly that colour
     return 2.0 * numPx / CAMERAWIDTH;
