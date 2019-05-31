@@ -12,6 +12,7 @@ using namespace std;
 AVC::AVC(int q) {
     quadrant = q;
     init(0);
+    set_motors(3,60);
     hardware_exchange();
 }
 
