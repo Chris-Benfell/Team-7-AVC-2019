@@ -99,7 +99,7 @@ void AVC::followLine() {
 
                     debug("Turn right");
                     debug(to_string(direction));
-                    sleep1(3000);
+                    sleep1(2700);
 
                 } else if (error != 0 && error > -9000 && error < 9000) { // Check if going straight on the line
 
@@ -178,8 +178,8 @@ void AVC::findDucks() {
             finish = findDuck("yellow");
         }
 		debug("Found yellow patch");
-		setMotors("forward");
-		sleep1(7000);
+		setMotors("yellowPatch");
+		sleep1(5000);
         // Finish was reached exit function
         quadrant = 5;
     }
@@ -462,10 +462,14 @@ void AVC::setMotors(string direction) {
     } else if (direction == "rotate left") { // Rotate slowly left
         vLeft = RIGHTDEFAULT+2;
         vRight = RIGHTDEFAULT;
+    } else if (direction == "yellowPatch") { // Go really fast
+        vLeft = LEFTDEFAULT;
+        vRight = RIGHTDEFAULT+2;
     } else if (direction == "really fast") { // Go really fast
         vLeft = 65;
         vRight = 32;
-    } else if (direction == "stop") {
+    }
+    else if (direction == "stop") {
 		vLeft = STOP;
 		vRight = STOP;
 	}
