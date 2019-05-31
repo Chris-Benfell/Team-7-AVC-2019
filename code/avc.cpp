@@ -87,11 +87,11 @@ void AVC::followLine() {
 					
                     debug("Turn left");
                     debug(to_string(direction));
-                    sleep1(2500);
+                    sleep1(2300);
 
                 } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 500 && errorRight < 1200 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
-                    sleep1(500);
+                    sleep1(200);
                     setMotors("90 right");
 
                     // Update direction
@@ -455,7 +455,7 @@ void AVC::setMotors(string direction) {
         vRight = RIGHTDEFAULT - 2;
     } else if (direction == "180") { // 180 degree turn (right)
         vLeft = LEFTDEFAULT;
-        vRight = LEFTDEFAULT + 2;
+        vRight = LEFTDEFAULT;
     } else if (direction == "rotate right") { // Rotate slowly right
         vLeft = LEFTDEFAULT - 2;
         vRight = LEFTDEFAULT;
