@@ -154,7 +154,7 @@ void AVC::findDucks() {
     if (quadrant == 4) {
 
         // Tilt camera
-        set_motors(CAMERASERVO, 55);
+        set_motors(CAMERASERVO, 33);
         hardware_exchange();
 
         // Find a red duck
