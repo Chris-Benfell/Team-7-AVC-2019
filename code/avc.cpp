@@ -34,7 +34,7 @@ void AVC::openGate() {
             receive_from_server(msg); // Get password back
             send_to_server(msg); // Send password back to server
             setMotors("really fast");
-            sleep1(6000);
+            sleep1(4000);
             quadrant = 2; // Next quadrant
         }
     }
@@ -78,7 +78,7 @@ void AVC::followLine() {
                 // Check error values for in front of robot, to left, and to right of robot
                 if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < 1000 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
-                    sleep1(500);
+                    //sleep1(500);
                     setMotors("90 left");
 
                     // Update direction
@@ -90,7 +90,7 @@ void AVC::followLine() {
 
                 } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 700 && errorRight < 1400 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
-                    sleep1(500);
+                    //sleep1(500);
                     setMotors("90 right");
 
                     // Update direction
@@ -136,7 +136,7 @@ void AVC::followLine() {
 
                     debug("Doing 180 turn");
                     debug(to_string(direction));
-                    sleep1(3500);
+                    sleep1(2000);
 
                 } else {
                     // Reverse until line is found
@@ -154,7 +154,9 @@ void AVC::findDucks() {
     if (quadrant == 4) {
 
         // Tilt camera
-        set_motors(CAMERASERVO, 65);
+        set_motors(CAMERASERVO, 30);
+        hardware_exchange();
+        set_motors(CAMERASERVO, 30);
         hardware_exchange();
 
         // Find a red duck
