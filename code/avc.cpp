@@ -12,6 +12,7 @@ using namespace std;
 AVC::AVC(int q) {
     quadrant = q;
     init(0);
+    set_motors(CAMERASERVO, 50);
     hardware_exchange();
 }
 
@@ -154,7 +155,7 @@ void AVC::findDucks() {
     if (quadrant == 4) {
 
         // Tilt camera
-        set_motors(CAMERASERVO, 33);
+        set_motors(CAMERASERVO, 30);
         hardware_exchange();
 
         // Find a red duck
