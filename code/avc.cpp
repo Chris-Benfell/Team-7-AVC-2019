@@ -12,7 +12,7 @@ using namespace std;
 AVC::AVC(int q) {
     quadrant = q;
     init(0);
-    set_motors(3,65);
+    set_motors(3,63);
     hardware_exchange();
 }
 
@@ -77,7 +77,7 @@ void AVC::followLine() {
                 calcError();
 
                 // Check error values for in front of robot, to left, and to right of robot
-                if (quadrant == 3 && direction - 1 > 0 && errorLeft > 400 && errorLeft < 1000 && errorLeft != 0) { // Check for a line on the left side (Q3)
+                if (quadrant == 3 && direction - 1 > 0 && errorLeft > 0 && errorLeft < 700 && errorLeft != 0) { // Check for a line on the left side (Q3)
                     // Turn 90 degrees left
                     //sleep1(500);
                     setMotors("90 left");
@@ -89,7 +89,7 @@ void AVC::followLine() {
                     debug(to_string(direction));
                     sleep1(2500);
 
-                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 1000 && errorRight < 1800 && errorRight != 0) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 500 && errorRight < 0 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     //sleep1(500);
                     setMotors("90 right");
@@ -99,7 +99,7 @@ void AVC::followLine() {
 
                     debug("Turn right");
                     debug(to_string(direction));
-                    sleep1(2500);
+                    sleep1(2800);
 
                 } else if (error != 0 && error > -9000 && error < 9000) { // Check if going straight on the line
 
@@ -137,7 +137,7 @@ void AVC::followLine() {
 
                     debug("Doing 180 turn");
                     debug(to_string(direction));
-                    sleep1(2500);
+                    sleep1(2200);
 
                 } else {
                     // Reverse until line is found
@@ -179,7 +179,7 @@ void AVC::findDucks() {
         }
 		debug("Found yellow patch");
 		setMotors("forward");
-		sleep1(5000);
+		sleep1(7000);
         // Finish was reached exit function
         quadrant = 5;
     }
