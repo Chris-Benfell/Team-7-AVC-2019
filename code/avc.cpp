@@ -464,7 +464,7 @@ void AVC::setMotors(string direction) {
         vLeft = RIGHTDEFAULT+2;
         vRight = RIGHTDEFAULT;
     } else if (direction == "really fast") { // Go really fast
-        vLeft = 63;
+        vLeft = 65;
         vRight = 30;
     } else if (direction == "stop") {
 		vLeft = STOP;
