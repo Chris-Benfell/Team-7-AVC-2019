@@ -137,7 +137,7 @@ void AVC::followLine() {
 
                     debug("Doing 180 turn");
                     debug(to_string(direction));
-                    sleep1(2200);
+                    sleep1(2700);
 
                 } else {
                     // Reverse until line is found
