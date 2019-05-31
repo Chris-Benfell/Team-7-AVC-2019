@@ -89,7 +89,7 @@ void AVC::followLine() {
                     debug(to_string(direction));
                     sleep1(2500);
 
-                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 500 && errorRight < 0 && errorRight != 0) { // Check for a line on the right side (Q3)
+                } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 500 && errorRight < 1200 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
                     //sleep1(500);
                     setMotors("90 right");
