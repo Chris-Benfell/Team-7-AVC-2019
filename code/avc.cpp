@@ -86,7 +86,7 @@ void AVC::followLine() {
 					
                     debug("Turn left");
                     debug(to_string(direction));
-                    sleep1(2700);
+                    sleep1(2500);
 
                 } else if (quadrant == 3 && direction + 1 < 4 && errorRight > 700 && errorRight < 1400 && errorRight != 0) { // Check for a line on the right side (Q3)
                     // Turn 90 degrees right
@@ -98,7 +98,7 @@ void AVC::followLine() {
 
                     debug("Turn right");
                     debug(to_string(direction));
-                    sleep1(2700);
+                    sleep1(2500);
 
                 } else if (error != 0 && error > -9000 && error < 9000) { // Check if going straight on the line
 
@@ -136,7 +136,7 @@ void AVC::followLine() {
 
                     debug("Doing 180 turn");
                     debug(to_string(direction));
-                    sleep1(2000);
+                    sleep1(2500);
 
                 } else {
                     // Reverse until line is found
