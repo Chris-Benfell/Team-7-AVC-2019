@@ -12,7 +12,7 @@ using namespace std;
 AVC::AVC(int q) {
     quadrant = q;
     init(0);
-    set_motors(3,60);
+    set_motors(3,65);
     hardware_exchange();
 }
 
@@ -466,7 +466,7 @@ void AVC::setMotors(string direction) {
         vRight = RIGHTDEFAULT;
     } else if (direction == "really fast") { // Go really fast
         vLeft = 65;
-        vRight = 30;
+        vRight = 32;
     } else if (direction == "stop") {
 		vLeft = STOP;
 		vRight = STOP;
