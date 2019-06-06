@@ -19,7 +19,7 @@ class AVC {
         static const int STOP = 48; // Speed value used to stop motors
         static const int LEFTDEFAULT = 56; // Default speed for left motor to go forward
         static const int RIGHTDEFAULT = 38; // Default speed for right motor to go forward
-        static const int DEBUG = true; // Set to true when you want to print stuff (use debug("hello");)
+        static const int DEBUG = false; // Set to true when you want to print stuff (use debug("hello");)
 
         // Variables
         int blackPx[CAMERAWIDTH]; // Array of ones and zeros to represent black and white picture (Q2 & Q3)
